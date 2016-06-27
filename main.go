@@ -8,6 +8,7 @@ import (
 	"golang.org/x/crypto/openpgp/clearsign"
 	"golang.org/x/crypto/openpgp/errors"
 	"golang.org/x/crypto/openpgp/packet"
+	"io/ioutil"
 )
 
 // ArmoredKeyToEntity returns a entity from the given byte slice
@@ -43,6 +44,29 @@ func ClearSignMessage(message []byte, entity *openpgp.Entity) ([]byte, error) {
 		return nil, err
 	}
 	return out.Bytes(), nil
+}
+
+// DecryptMessage decrypts a armored message using the given entity
+func DecryptMessage(message []byte, entity *openpgp.Entity) ([]byte, error) {
+	rd := bytes.NewReader(message)
+	keyring := openpgp.EntityList{entity}
+
+	block, err := armor.Decode(rd)
+	if err != nil {
+		return nil, err
+	}
+	md, err := openpgp.ReadMessage(block.Body, keyring, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	if !md.IsEncrypted {
+		return message, fmt.Errorf("message is not encrypted")
+	}
+	out, err := ioutil.ReadAll(md.UnverifiedBody)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // DetachSignMessage generates a amored detached sign message using a entity
