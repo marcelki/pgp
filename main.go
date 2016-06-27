@@ -81,14 +81,16 @@ func DetachSignMessage(message []byte, entity *openpgp.Entity) ([]byte, error) {
 	return out.Bytes(), nil
 }
 
-// EncryptMessage encrypts a message to a number of entities and returns the encrypted armored message
-func EncryptMessage(message []byte, entities []*openpgp.Entity) ([]byte, error) {
+// EncryptMessage encrypts a message to a entity and returns the encrypted ascii armored data block
+func EncryptMessage(message []byte, entity *openpgp.Entity) ([]byte, error) {
 	out := &bytes.Buffer{}
+	to := openpgp.EntityList{entity}
+
 	enc, err := armor.Encode(out, "PGP MESSAGE", nil)
 	if err != nil {
 		return nil, err
 	}
-	wc, err := openpgp.Encrypt(enc, entities, nil, nil, nil)
+	wc, err := openpgp.Encrypt(enc, to, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
