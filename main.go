@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 )
 
-// ArmoredKeyToEntity returns a entity from the given byte slice
+// ArmoredKeyToEntity returns a entity from the given ascii armored key
 //
 // TODO: decrypt private key if its encrypted
 func ArmoredKeyToEntity(key []byte) (*openpgp.Entity, error) {
