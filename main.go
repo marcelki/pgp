@@ -50,11 +50,11 @@ func CheckDetachedSignature(message, signature []byte, entity *openpgp.Entity) (
 func CheckClearSignedSignature(buf []byte, entity *openpgp.Entity) (bool, error) {
 	keyring := openpgp.EntityList{entity}
 
-	b, _ := clearsign.Decode(buf)
-	if b == nil {
+	block, _ := clearsign.Decode(buf)
+	if block == nil {
 		return false, nil
 	}
-	ent, err := openpgp.CheckDetachedSignature(keyring, bytes.NewReader(b.Bytes), b.ArmoredSignature.Body)
+	ent, err := openpgp.CheckDetachedSignature(keyring, bytes.NewReader(block.Bytes), block.ArmoredSignature.Body)
 	if err != nil {
 		if err == errors.ErrUnknownIssuer {
 			return false, nil
