@@ -46,6 +46,28 @@ func CheckDetachedSignature(message, signature []byte, entity *openpgp.Entity) (
 	return true, nil
 }
 
+// CheckClearSignedSignature checks if the given ascii armored clear signed signature has ben signed by the given entity
+func CheckClearSignedSignature(buf []byte, entity *openpgp.Entity) (bool, error) {
+	keyring := openpgp.EntityList{entity}
+
+	b, _ := clearsign.Decode(buf)
+	if b == nil {
+		return false, nil
+	}
+	ent, err := openpgp.CheckDetachedSignature(keyring, bytes.NewReader(b.Bytes), b.ArmoredSignature.Body)
+	if err != nil {
+		if err == errors.ErrUnknownIssuer {
+			return false, nil
+		}
+		return false, err
+	}
+	if ent != entity {
+		return false, nil
+	}
+	return true, nil
+
+}
+
 // ClearSignMessage generates a clear-signed message using the private key from the given entity.
 func ClearSignMessage(message []byte, entity *openpgp.Entity) ([]byte, error) {
 	out := &bytes.Buffer{}
